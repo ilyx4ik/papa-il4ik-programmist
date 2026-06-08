@@ -1,63 +1,46 @@
-def rle_encode(text: str) -> str:
-    if not text:
-        return ""
-    
-    encoded = []
-    current_char = text[0]
-    count = 1
-    
-    for char in text[1:]:
-        if char == current_char:
+import sys
+
+def rle_encode(s):
+    if not s: return ""
+    res = []
+    i = 0
+    while i < len(s):
+        count = 1
+        while i + 1 < len(s) and s[i] == s[i+1]:
             count += 1
-        else:
-            encoded.append(f"{count}{current_char}")
-            current_char = char
-            count = 1
-    encoded.append(f"{count}{current_char}")
-    
-    return "".join(encoded)
+            i += 1
+        res.append(f"{count}{s[i]}")
+        i += 1
+    return "".join(res)
 
+def rle_decode(s):
+    res = []
+    i = 0
+    while i < len(s):
+        count_str = ""
+        while i < len(s) and s[i].isdigit():
+            count_str += s[i]
+            i += 1
+        res.append(s[i] * int(count_str))
+        i += 1
+    return "".join(res)
 
-def rle_decode(encoded_text: str) -> str:
-    if not encoded_text:
-        return ""
-    
-    decoded = []
-    count_str = ""
-    
-    for char in encoded_text:
-        if char.isdigit():
-            count_str += char  
-        else:
-            count = int(count_str) if count_str else 1
-            decoded.append(char * count)
-            count_str = ""
-            
-    return "".join(decoded)
+def run_tests():
+    assert rle_encode("AAAAABBBCC") == "5A3B2C"
+    assert rle_decode("5A3B2C") == "AAAAABBBCC"
+    print("Тести пройдено")
 
-
-def calculate_compression_percentage(original: str, compressed: str) -> float:
-    if not original:
-        return 0.0
-    len_orig = len(original)
-    len_comp = len(compressed)
-    
-    percentage = ((len_orig - len_comp) / len_orig) * 100
-    return percentage
-
+def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
+        run_tests()
+        return
+    orig = input().strip()
+    comp = rle_encode(orig)
+    decomp = rle_decode(comp)
+    pct = ((len(orig) - len(comp)) / len(orig)) * 100 if len(orig) > 0 else 0
+    print(comp)
+    print(f"{pct:.2f}%")
+    print(decomp)
 
 if __name__ == "__main__":
-    print("--- Демонстрація роботи програми ---")
-    input_string = input("Введіть рядок для стиснення: ")
-    
-    compressed_string = rle_encode(input_string)
-    print(f"\nСтиснений рядок: {compressed_string}")
-    
-    comp_percent = calculate_compression_percentage(input_string, compressed_string)
-    print(f"Довжина зменшилася на: {comp_percent:.2f}%")
-
-    decompressed_string = rle_decode(compressed_string)
-    print(f"Розтиснений рядок:  {decompressed_string}")
-    
-    assert input_string == decompressed_string, "Помилка! Дані втрачено!"
-    print("Результат: Успішно відновлено 1-в-1.")
+    main()
